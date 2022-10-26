@@ -40,6 +40,7 @@ router.get("/", auth.optional, function(req, res, next) {
   var query = {};
   var limit = 100;
   var offset = 0;
+  let title;
 
   if (typeof req.query.limit !== "undefined") {
     limit = req.query.limit;
@@ -51,6 +52,10 @@ router.get("/", auth.optional, function(req, res, next) {
 
   if (typeof req.query.tag !== "undefined") {
     query.tagList = { $in: [req.query.tag] };
+  }
+
+  if (typeof req.query.title !== "undefined") {
+    title = req.query.title;
   }
 
   Promise.all([
@@ -71,6 +76,9 @@ router.get("/", auth.optional, function(req, res, next) {
         query._id = { $in: [] };
       }
 
+      if(title) {
+        query.title = {$regex: title, $options: 'i'}
+      }
       return Promise.all([
         Item.find(query)
           .limit(Number(limit))
